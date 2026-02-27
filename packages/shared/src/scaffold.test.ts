@@ -1,0 +1,72 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { beforeAll, describe, expect, it } from "vitest";
+import { describeBuildOutput, getPkgRoot } from "./scaffold-helpers.js";
+
+const pkgRoot = getPkgRoot(import.meta.url);
+const distDir = resolve(pkgRoot, "dist");
+const monorepoRoot = resolve(pkgRoot, "../..");
+
+const PACKAGES = ["shared", "core", "mcp-server", "rest-api", "sdk", "cli"] as const;
+
+describe("shared", () => {
+  describeBuildOutput(distDir);
+});
+
+describe("monorepo structure", () => {
+  for (const pkg of PACKAGES) {
+    describe(pkg, () => {
+      let pkgJson: Record<string, unknown>;
+
+      beforeAll(() => {
+        const raw = readFileSync(resolve(monorepoRoot, "packages", pkg, "package.json"), "utf-8");
+        pkgJson = JSON.parse(raw) as Record<string, unknown>;
+      });
+
+      it('has "type": "module"', () => {
+        expect(pkgJson.type).toBe("module");
+      });
+
+      it("has correct exports field", () => {
+        expect(pkgJson.exports).toBeDefined();
+        const exports = pkgJson.exports as Record<string, Record<string, string>>;
+        expect(exports["."]).toBeDefined();
+        expect(exports["."].types).toBe("./dist/index.d.ts");
+        expect(exports["."].import).toBe("./dist/index.js");
+      });
+
+      it('has "build" script', () => {
+        expect(pkgJson.scripts).toBeDefined();
+        const scripts = pkgJson.scripts as Record<string, string>;
+        expect(scripts.build).toBeDefined();
+      });
+
+      it('has "test" script', () => {
+        expect(pkgJson.scripts).toBeDefined();
+        const scripts = pkgJson.scripts as Record<string, string>;
+        expect(scripts.test).toBeDefined();
+      });
+    });
+  }
+});
+
+describe("bin entries", () => {
+  it('cli declares "sv" bin', () => {
+    const raw = readFileSync(resolve(monorepoRoot, "packages", "cli", "package.json"), "utf-8");
+    const pkgJson = JSON.parse(raw) as Record<string, unknown>;
+    expect(pkgJson.bin).toBeDefined();
+    const bin = pkgJson.bin as Record<string, string>;
+    expect(bin.sv).toBe("./dist/index.js");
+  });
+
+  it('mcp-server declares "secret-vault-mcp" bin', () => {
+    const raw = readFileSync(
+      resolve(monorepoRoot, "packages", "mcp-server", "package.json"),
+      "utf-8",
+    );
+    const pkgJson = JSON.parse(raw) as Record<string, unknown>;
+    expect(pkgJson.bin).toBeDefined();
+    const bin = pkgJson.bin as Record<string, string>;
+    expect(bin["secret-vault-mcp"]).toBe("./dist/index.js");
+  });
+});
