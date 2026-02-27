@@ -28,12 +28,12 @@ export function describeBuildOutput(distDir: string, options?: { shebang?: boole
 
     it("dist/index.js is valid ESM", () => {
       const content = readFileSync(resolve(distDir, "index.js"), "utf-8");
-      expect(content).toMatch(/export\s*\{/);
+      expect(content).toMatch(/export\s*[{*]/);
     });
 
     it("dist/index.d.ts is valid ESM", () => {
       const content = readFileSync(resolve(distDir, "index.d.ts"), "utf-8");
-      expect(content).toMatch(/export\s*\{/);
+      expect(content).toMatch(/export\s*[{*]/);
     });
 
     if (options?.shebang) {
