@@ -105,6 +105,31 @@ describe("formatHandle", () => {
   });
 });
 
+describe("handle edge cases", () => {
+  it("formatHandle with empty string project throws INVALID_PROJECT_NAME", () => {
+    expect(() => formatHandle("name", "")).toThrow(VaultError);
+    try {
+      formatHandle("name", "");
+    } catch (e) {
+      expect((e as VaultError).code).toBe(ErrorCode.INVALID_PROJECT_NAME);
+    }
+  });
+
+  it("rejects Unicode characters in handle", () => {
+    expect(isValidHandle("secret://café")).toBe(false);
+  });
+
+  it("parseHandle preserves casing", () => {
+    const result = parseHandle("secret://MyApi/GitHub-Token");
+    expect(result).toEqual({ project: "MyApi", name: "GitHub-Token" });
+  });
+
+  it("accepts very long name (no length limit, no regex backtracking)", () => {
+    const longName = "a".repeat(500);
+    expect(isValidHandle(`secret://${longName}`)).toBe(true);
+  });
+});
+
 describe("roundtrip", () => {
   it("parseHandle(formatHandle(name)) === { name }", () => {
     expect(parseHandle(formatHandle("my-key"))).toEqual({ name: "my-key" });

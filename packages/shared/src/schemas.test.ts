@@ -117,6 +117,14 @@ describe("injectionConfigSchema", () => {
   it("rejects unknown injection type", () => {
     expect(() => injectionConfigSchema.parse({ type: "cookie" })).toThrow();
   });
+
+  it("rejects header with empty header_name", () => {
+    expect(() => injectionConfigSchema.parse({ type: "header", header_name: "" })).toThrow();
+  });
+
+  it("rejects query with empty query_param", () => {
+    expect(() => injectionConfigSchema.parse({ type: "query", query_param: "" })).toThrow();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -155,6 +163,27 @@ describe("createSecretInputSchema", () => {
 
   it("rejects invalid name format", () => {
     expect(() => createSecretInputSchema.parse({ name: "has space", type: "api_key" })).toThrow();
+  });
+
+  it("rejects empty string project", () => {
+    expect(() =>
+      createSecretInputSchema.parse({ name: "key", type: "api_key", project: "" }),
+    ).toThrow();
+  });
+
+  it("rejects project with dots", () => {
+    expect(() =>
+      createSecretInputSchema.parse({ name: "key", type: "api_key", project: "has.dot" }),
+    ).toThrow();
+  });
+
+  it("accepts valid project name", () => {
+    const result = createSecretInputSchema.parse({
+      name: "key",
+      type: "api_key",
+      project: "valid-name",
+    });
+    expect(result.project).toBe("valid-name");
   });
 });
 
@@ -215,6 +244,52 @@ describe("useSecretRequestSchema", () => {
     expect(() => useSecretRequestSchema.parse({ handle: "secret://k" })).toThrow();
     expect(() => useSecretRequestSchema.parse({ ...validRequest, handle: undefined })).toThrow();
   });
+
+  it("rejects timeout_ms: 0", () => {
+    expect(() =>
+      useSecretRequestSchema.parse({
+        ...validRequest,
+        request: { ...validRequest.request, timeout_ms: 0 },
+      }),
+    ).toThrow();
+  });
+
+  it("rejects timeout_ms: -1", () => {
+    expect(() =>
+      useSecretRequestSchema.parse({
+        ...validRequest,
+        request: { ...validRequest.request, timeout_ms: -1 },
+      }),
+    ).toThrow();
+  });
+
+  it("rejects timeout_ms: 1.5 (non-integer)", () => {
+    expect(() =>
+      useSecretRequestSchema.parse({
+        ...validRequest,
+        request: { ...validRequest.request, timeout_ms: 1.5 },
+      }),
+    ).toThrow();
+  });
+
+  it("accepts timeout_ms: 1", () => {
+    const result = useSecretRequestSchema.parse({
+      ...validRequest,
+      request: { ...validRequest.request, timeout_ms: 1 },
+    });
+    expect(result.request.timeout_ms).toBe(1);
+  });
+
+  it.each(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"] as const)(
+    "accepts HTTP method %s",
+    (method) => {
+      const result = useSecretRequestSchema.parse({
+        ...validRequest,
+        request: { ...validRequest.request, method },
+      });
+      expect(result.request.method).toBe(method);
+    },
+  );
 });
 
 // ---------------------------------------------------------------------------
@@ -241,6 +316,38 @@ describe("accessPolicyInputSchema", () => {
       }),
     ).toThrow();
   });
+
+  it("rejects empty principal_id", () => {
+    expect(() =>
+      accessPolicyInputSchema.parse({
+        principal_type: "agent",
+        principal_id: "",
+        permissions: ["read"],
+      }),
+    ).toThrow();
+  });
+
+  it("rejects expires_at: 0", () => {
+    expect(() =>
+      accessPolicyInputSchema.parse({
+        principal_type: "agent",
+        principal_id: "claude-code",
+        permissions: ["read"],
+        expires_at: 0,
+      }),
+    ).toThrow();
+  });
+
+  it("rejects expires_at: -1", () => {
+    expect(() =>
+      accessPolicyInputSchema.parse({
+        principal_type: "agent",
+        principal_id: "claude-code",
+        permissions: ["read"],
+        expires_at: -1,
+      }),
+    ).toThrow();
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -263,6 +370,35 @@ describe("auditQuerySchema", () => {
 
   it("rejects limit over 1000", () => {
     expect(() => auditQuerySchema.parse({ limit: 1001 })).toThrow();
+  });
+
+  it("rejects limit: 0", () => {
+    expect(() => auditQuerySchema.parse({ limit: 0 })).toThrow();
+  });
+
+  it("accepts limit: 1 (minimum positive)", () => {
+    expect(auditQuerySchema.parse({ limit: 1 }).limit).toBe(1);
+  });
+
+  it("accepts limit: 1000 (maximum)", () => {
+    expect(auditQuerySchema.parse({ limit: 1000 }).limit).toBe(1000);
+  });
+
+  it("accepts since: 0 (nonnegative)", () => {
+    expect(auditQuerySchema.parse({ since: 0 }).since).toBe(0);
+  });
+
+  it("rejects since: -1", () => {
+    expect(() => auditQuerySchema.parse({ since: -1 })).toThrow();
+  });
+
+  it("accepts valid UUID for secret_id", () => {
+    const uuid = "550e8400-e29b-41d4-a716-446655440000";
+    expect(auditQuerySchema.parse({ secret_id: uuid }).secret_id).toBe(uuid);
+  });
+
+  it("rejects non-UUID secret_id", () => {
+    expect(() => auditQuerySchema.parse({ secret_id: "not-uuid" })).toThrow();
   });
 });
 
@@ -305,5 +441,25 @@ describe("sessionFileSchema", () => {
 
   it("rejects empty string for base64 fields", () => {
     expect(() => sessionFileSchema.parse({ ...validSession, session_key: "" })).toThrow();
+  });
+
+  it.each([
+    "session_key",
+    "wrapped_kek",
+    "wrapped_kek_iv",
+    "wrapped_kek_tag",
+    "wrapped_jwt_key",
+    "wrapped_jwt_key_iv",
+    "wrapped_jwt_key_tag",
+  ] as const)("rejects empty string for %s", (field) => {
+    expect(() => sessionFileSchema.parse({ ...validSession, [field]: "" })).toThrow();
+  });
+
+  it("rejects created_at: 0", () => {
+    expect(() => sessionFileSchema.parse({ ...validSession, created_at: 0 })).toThrow();
+  });
+
+  it("rejects created_at: -1", () => {
+    expect(() => sessionFileSchema.parse({ ...validSession, created_at: -1 })).toThrow();
   });
 });
