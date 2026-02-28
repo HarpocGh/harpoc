@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { MAX_NAME_LENGTH } from "./constants.js";
 import { isValidHandle } from "./handle.js";
 import {
   AuditEventType,
@@ -50,14 +51,14 @@ export const handleSchema = z.string().refine(isValidHandle, { message: "Invalid
 // ---------------------------------------------------------------------------
 
 export const injectionConfigSchema = z.discriminatedUnion("type", [
-  z.object({ type: z.literal("bearer") }),
-  z.object({ type: z.literal("basic_auth") }),
+  z.object({ type: z.literal(InjectionType.BEARER) }),
+  z.object({ type: z.literal(InjectionType.BASIC_AUTH) }),
   z.object({
-    type: z.literal("header"),
+    type: z.literal(InjectionType.HEADER),
     header_name: z.string().min(1),
   }),
   z.object({
-    type: z.literal("query"),
+    type: z.literal(InjectionType.QUERY),
     query_param: z.string().min(1),
   }),
 ]);
@@ -66,7 +67,10 @@ export const injectionConfigSchema = z.discriminatedUnion("type", [
 // Input validation schemas (API boundaries: REST bodies, MCP inputs, CLI args)
 // ---------------------------------------------------------------------------
 
-const namePattern = z.string().regex(/^[a-zA-Z0-9_-]+$/, "Invalid name format");
+const namePattern = z
+  .string()
+  .regex(/^[a-zA-Z0-9_-]+$/, "Invalid name format")
+  .max(MAX_NAME_LENGTH);
 
 export const createSecretInputSchema = z.object({
   name: namePattern,
@@ -75,7 +79,7 @@ export const createSecretInputSchema = z.object({
   injection: injectionConfigSchema.optional(),
 });
 
-const httpMethodSchema = z.enum(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"]);
+export const httpMethodSchema = z.enum(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"]);
 
 export const useSecretRequestSchema = z.object({
   handle: handleSchema,
@@ -84,7 +88,7 @@ export const useSecretRequestSchema = z.object({
     url: z.string().url(),
     headers: z.record(z.string()).optional(),
     body: z.string().optional(),
-    timeout_ms: z.number().int().positive().optional(),
+    timeout_ms: z.number().int().positive().max(300_000).optional(),
   }),
   injection: injectionConfigSchema,
   follow_redirects: followRedirectsSchema.optional(),
@@ -109,7 +113,7 @@ export const auditQuerySchema = z.object({
 // Session file schema (for deserializing session.json)
 // ---------------------------------------------------------------------------
 
-const base64Pattern = z.string().min(1);
+const base64Pattern = z.string().min(1).base64();
 
 export const sessionFileSchema = z.object({
   version: z.literal(1),

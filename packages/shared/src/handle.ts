@@ -1,3 +1,4 @@
+import { MAX_NAME_LENGTH } from "./constants.js";
 import { ErrorCode, VaultError } from "./errors.js";
 import type { ParsedHandle } from "./types.js";
 
@@ -9,7 +10,7 @@ export function isValidHandle(handle: string): boolean {
 }
 
 export function isValidName(name: string): boolean {
-  return NAME_REGEX.test(name);
+  return name.length <= MAX_NAME_LENGTH && NAME_REGEX.test(name);
 }
 
 export function parseHandle(handle: string): ParsedHandle {

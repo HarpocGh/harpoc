@@ -7,7 +7,9 @@ import {
   createSecretInputSchema,
   followRedirectsSchema,
   handleSchema,
+  httpMethodSchema,
   injectionConfigSchema,
+  injectionTypeSchema,
   permissionSchema,
   principalTypeSchema,
   secretStatusSchema,
@@ -33,8 +35,29 @@ describe("enum schemas", () => {
 
   it("secretStatusSchema accepts valid values", () => {
     expect(secretStatusSchema.parse("active")).toBe("active");
+    expect(secretStatusSchema.parse("pending")).toBe("pending");
     expect(secretStatusSchema.parse("expired")).toBe("expired");
     expect(secretStatusSchema.parse("revoked")).toBe("revoked");
+  });
+
+  it("injectionTypeSchema accepts valid values", () => {
+    for (const v of ["header", "query", "basic_auth", "bearer"]) {
+      expect(injectionTypeSchema.parse(v)).toBe(v);
+    }
+  });
+
+  it("injectionTypeSchema rejects invalid values", () => {
+    expect(() => injectionTypeSchema.parse("cookie")).toThrow();
+  });
+
+  it("httpMethodSchema accepts valid methods", () => {
+    for (const m of ["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"]) {
+      expect(httpMethodSchema.parse(m)).toBe(m);
+    }
+  });
+
+  it("httpMethodSchema rejects invalid methods", () => {
+    expect(() => httpMethodSchema.parse("CONNECT")).toThrow();
   });
 
   it("permissionSchema accepts all valid permissions", () => {
@@ -185,6 +208,17 @@ describe("createSecretInputSchema", () => {
     });
     expect(result.project).toBe("valid-name");
   });
+
+  it("rejects name longer than 255 characters", () => {
+    expect(() =>
+      createSecretInputSchema.parse({ name: "a".repeat(256), type: "api_key" }),
+    ).toThrow();
+  });
+
+  it("accepts name of exactly 255 characters", () => {
+    const result = createSecretInputSchema.parse({ name: "a".repeat(255), type: "api_key" });
+    expect(result.name).toBe("a".repeat(255));
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -278,6 +312,23 @@ describe("useSecretRequestSchema", () => {
       request: { ...validRequest.request, timeout_ms: 1 },
     });
     expect(result.request.timeout_ms).toBe(1);
+  });
+
+  it("rejects timeout_ms exceeding 300000 (5 minutes)", () => {
+    expect(() =>
+      useSecretRequestSchema.parse({
+        ...validRequest,
+        request: { ...validRequest.request, timeout_ms: 300_001 },
+      }),
+    ).toThrow();
+  });
+
+  it("accepts timeout_ms: 300000 (5 minutes)", () => {
+    const result = useSecretRequestSchema.parse({
+      ...validRequest,
+      request: { ...validRequest.request, timeout_ms: 300_000 },
+    });
+    expect(result.request.timeout_ms).toBe(300_000);
   });
 
   it.each(["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD"] as const)(
@@ -461,5 +512,17 @@ describe("sessionFileSchema", () => {
 
   it("rejects created_at: -1", () => {
     expect(() => sessionFileSchema.parse({ ...validSession, created_at: -1 })).toThrow();
+  });
+
+  it("rejects non-base64 string for session_key", () => {
+    expect(() =>
+      sessionFileSchema.parse({ ...validSession, session_key: "not base64!!!" }),
+    ).toThrow();
+  });
+
+  it("rejects non-base64 string for wrapped_kek", () => {
+    expect(() =>
+      sessionFileSchema.parse({ ...validSession, wrapped_kek: "%%%invalid%%%" }),
+    ).toThrow();
   });
 });

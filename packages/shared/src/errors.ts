@@ -172,4 +172,42 @@ export class VaultError extends Error {
   static internalError(message: string): VaultError {
     return new VaultError(ErrorCode.INTERNAL_ERROR, message);
   }
+
+  static vaultCorrupted(detail?: string): VaultError {
+    const msg = detail ? `Vault corrupted: ${detail}` : "Vault corrupted";
+    return new VaultError(ErrorCode.VAULT_CORRUPTED, msg);
+  }
+
+  static encryptionError(detail?: string): VaultError {
+    const msg = detail ? `Encryption error: ${detail}` : "Encryption error";
+    return new VaultError(ErrorCode.ENCRYPTION_ERROR, msg);
+  }
+
+  static databaseError(detail?: string): VaultError {
+    const msg = detail ? `Database error: ${detail}` : "Database error";
+    return new VaultError(ErrorCode.DATABASE_ERROR, msg);
+  }
+
+  static secretExpired(handle?: string): VaultError {
+    const msg = handle ? `Secret expired: ${handle}` : "Secret expired";
+    return new VaultError(ErrorCode.SECRET_EXPIRED, msg);
+  }
+
+  static secretRevoked(handle?: string): VaultError {
+    const msg = handle ? `Secret revoked: ${handle}` : "Secret revoked";
+    return new VaultError(ErrorCode.SECRET_REVOKED, msg);
+  }
+
+  static tokenExpired(): VaultError {
+    return new VaultError(ErrorCode.TOKEN_EXPIRED, "Token expired");
+  }
+
+  static tokenRevoked(): VaultError {
+    return new VaultError(ErrorCode.TOKEN_REVOKED, "Token revoked");
+  }
+
+  static sessionFileError(detail?: string): VaultError {
+    const msg = detail ? `Session file error: ${detail}` : "Session file error";
+    return new VaultError(ErrorCode.SESSION_FILE_ERROR, msg);
+  }
 }

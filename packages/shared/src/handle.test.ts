@@ -27,6 +27,7 @@ describe("isValidHandle", () => {
     "http://github-token",
     "secret://proj//name",
     "secret://na!me",
+    "secret://name/",
   ])("rejects invalid handle: %s", (h) => {
     expect(isValidHandle(h)).toBe(false);
   });
@@ -59,6 +60,7 @@ describe("parseHandle", () => {
   });
 
   it("throws VaultError with INVALID_HANDLE for invalid input", () => {
+    expect.assertions(3);
     expect(() => parseHandle("not-a-handle")).toThrow(VaultError);
     try {
       parseHandle("bad://handle");
@@ -87,6 +89,7 @@ describe("formatHandle", () => {
   });
 
   it("throws for invalid name", () => {
+    expect.assertions(2);
     expect(() => formatHandle("bad name")).toThrow(VaultError);
     try {
       formatHandle("bad.name");
@@ -96,6 +99,7 @@ describe("formatHandle", () => {
   });
 
   it("throws for invalid project name", () => {
+    expect.assertions(2);
     expect(() => formatHandle("name", "bad project")).toThrow(VaultError);
     try {
       formatHandle("name", "bad.project");
@@ -107,6 +111,7 @@ describe("formatHandle", () => {
 
 describe("handle edge cases", () => {
   it("formatHandle with empty string project throws INVALID_PROJECT_NAME", () => {
+    expect.assertions(2);
     expect(() => formatHandle("name", "")).toThrow(VaultError);
     try {
       formatHandle("name", "");
@@ -124,7 +129,19 @@ describe("handle edge cases", () => {
     expect(result).toEqual({ project: "MyApi", name: "GitHub-Token" });
   });
 
-  it("accepts very long name (no length limit, no regex backtracking)", () => {
+  it("isValidName rejects name longer than 255 characters", () => {
+    expect(isValidName("a".repeat(256))).toBe(false);
+  });
+
+  it("isValidName accepts name of exactly 255 characters", () => {
+    expect(isValidName("a".repeat(255))).toBe(true);
+  });
+
+  it("formatHandle rejects name longer than 255 characters", () => {
+    expect(() => formatHandle("a".repeat(256))).toThrow(VaultError);
+  });
+
+  it("accepts very long handle (isValidHandle has no name length limit)", () => {
     const longName = "a".repeat(500);
     expect(isValidHandle(`secret://${longName}`)).toBe(true);
   });

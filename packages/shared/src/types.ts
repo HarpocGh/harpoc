@@ -11,6 +11,7 @@ export type SecretType = (typeof SecretType)[keyof typeof SecretType];
 
 export const SecretStatus = {
   ACTIVE: "active",
+  PENDING: "pending",
   EXPIRED: "expired",
   REVOKED: "revoked",
 } as const;
@@ -138,7 +139,7 @@ export interface AuditEvent {
   detail_iv: Uint8Array | null;
   detail_tag: Uint8Array | null;
   ip_address: string | null;
-  session_id: string;
+  session_id: string | null;
   success: boolean;
 }
 
@@ -227,6 +228,6 @@ export interface ParsedHandle {
 /** Response after creating a secret. */
 export interface CreateSecretResponse {
   handle: string;
-  status: string;
+  status: "created" | "pending";
   message: string;
 }

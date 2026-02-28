@@ -170,4 +170,91 @@ describe("factory methods", () => {
     expect(err.code).toBe(ErrorCode.ACCESS_DENIED);
     expect(err.message).toBe("Access denied");
   });
+
+  it("vaultCorrupted() without detail", () => {
+    const err = VaultError.vaultCorrupted();
+    expect(err.code).toBe(ErrorCode.VAULT_CORRUPTED);
+    expect(err.statusCode).toBe(500);
+    expect(err.message).toBe("Vault corrupted");
+  });
+
+  it("vaultCorrupted() with detail", () => {
+    const err = VaultError.vaultCorrupted("bad header checksum");
+    expect(err.code).toBe(ErrorCode.VAULT_CORRUPTED);
+    expect(err.message).toBe("Vault corrupted: bad header checksum");
+  });
+
+  it("encryptionError() without detail", () => {
+    const err = VaultError.encryptionError();
+    expect(err.code).toBe(ErrorCode.ENCRYPTION_ERROR);
+    expect(err.statusCode).toBe(500);
+    expect(err.message).toBe("Encryption error");
+  });
+
+  it("encryptionError() with detail", () => {
+    const err = VaultError.encryptionError("GCM tag mismatch");
+    expect(err.message).toBe("Encryption error: GCM tag mismatch");
+  });
+
+  it("databaseError() without detail", () => {
+    const err = VaultError.databaseError();
+    expect(err.code).toBe(ErrorCode.DATABASE_ERROR);
+    expect(err.statusCode).toBe(500);
+    expect(err.message).toBe("Database error");
+  });
+
+  it("databaseError() with detail", () => {
+    const err = VaultError.databaseError("table locked");
+    expect(err.message).toBe("Database error: table locked");
+  });
+
+  it("secretExpired() without handle", () => {
+    const err = VaultError.secretExpired();
+    expect(err.code).toBe(ErrorCode.SECRET_EXPIRED);
+    expect(err.statusCode).toBe(410);
+    expect(err.message).toBe("Secret expired");
+  });
+
+  it("secretExpired() with handle", () => {
+    const err = VaultError.secretExpired("secret://my-key");
+    expect(err.message).toBe("Secret expired: secret://my-key");
+  });
+
+  it("secretRevoked() without handle", () => {
+    const err = VaultError.secretRevoked();
+    expect(err.code).toBe(ErrorCode.SECRET_REVOKED);
+    expect(err.statusCode).toBe(410);
+    expect(err.message).toBe("Secret revoked");
+  });
+
+  it("secretRevoked() with handle", () => {
+    const err = VaultError.secretRevoked("secret://old-key");
+    expect(err.message).toBe("Secret revoked: secret://old-key");
+  });
+
+  it("tokenExpired()", () => {
+    const err = VaultError.tokenExpired();
+    expect(err.code).toBe(ErrorCode.TOKEN_EXPIRED);
+    expect(err.statusCode).toBe(401);
+    expect(err.message).toBe("Token expired");
+  });
+
+  it("tokenRevoked()", () => {
+    const err = VaultError.tokenRevoked();
+    expect(err.code).toBe(ErrorCode.TOKEN_REVOKED);
+    expect(err.statusCode).toBe(401);
+    expect(err.message).toBe("Token revoked");
+  });
+
+  it("sessionFileError() without detail", () => {
+    const err = VaultError.sessionFileError();
+    expect(err.code).toBe(ErrorCode.SESSION_FILE_ERROR);
+    expect(err.statusCode).toBe(500);
+    expect(err.message).toBe("Session file error");
+  });
+
+  it("sessionFileError() with detail", () => {
+    const err = VaultError.sessionFileError("parse failed");
+    expect(err.message).toBe("Session file error: parse failed");
+  });
 });

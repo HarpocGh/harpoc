@@ -94,3 +94,7 @@ export const VAULT_AUDIT_ENABLED = true;
 // -- HTTP / use_secret defaults ----------------------------------------------
 
 export const DEFAULT_HTTP_TIMEOUT_MS = 30_000; // 30 seconds
+
+// -- Name constraints --------------------------------------------------------
+
+export const MAX_NAME_LENGTH = 255;

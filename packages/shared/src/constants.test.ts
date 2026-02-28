@@ -21,6 +21,7 @@ import {
   CONFIG_FILE_NAME,
   DEFAULT_HTTP_TIMEOUT_MS,
   DEFAULT_SESSION_TTL_MS,
+  MAX_NAME_LENGTH,
   HKDF_INFO_AUDIT,
   HKDF_INFO_JWT_SIGNING,
   HKDF_INFO_SYNC,
@@ -316,5 +317,9 @@ describe("vault defaults", () => {
 
   it("DEFAULT_HTTP_TIMEOUT_MS is 30 seconds", () => {
     expect(DEFAULT_HTTP_TIMEOUT_MS).toBe(30_000);
+  });
+
+  it("MAX_NAME_LENGTH is 255", () => {
+    expect(MAX_NAME_LENGTH).toBe(255);
   });
 });

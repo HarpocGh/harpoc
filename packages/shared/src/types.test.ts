@@ -21,8 +21,8 @@ describe("enum member counts", () => {
     expect(Object.values(SecretType)).toHaveLength(3);
   });
 
-  it("SecretStatus has 3 members", () => {
-    expect(Object.values(SecretStatus)).toHaveLength(3);
+  it("SecretStatus has 4 members", () => {
+    expect(Object.values(SecretStatus)).toHaveLength(4);
   });
 
   it("Permission has 7 members", () => {
@@ -85,6 +85,17 @@ describe("Permission values", () => {
     ["ADMIN", "admin"],
   ] as const)("%s is '%s'", (key, value) => {
     expect(Permission[key]).toBe(value);
+  });
+});
+
+describe("SecretStatus values", () => {
+  it.each([
+    ["ACTIVE", "active"],
+    ["PENDING", "pending"],
+    ["EXPIRED", "expired"],
+    ["REVOKED", "revoked"],
+  ] as const)("%s is '%s'", (key, value) => {
+    expect(SecretStatus[key]).toBe(value);
   });
 });
 
