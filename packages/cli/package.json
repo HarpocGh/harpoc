@@ -1,10 +1,10 @@
 {
-  "name": "@secret-vault/cli",
+  "name": "@harpoc/cli",
   "version": "0.0.0",
   "private": true,
   "type": "module",
   "bin": {
-    "sv": "./dist/index.js"
+    "harpoc": "./dist/index.js"
   },
   "exports": {
     ".": {
@@ -13,8 +13,8 @@
     }
   },
   "dependencies": {
-    "@secret-vault/shared": "workspace:*",
-    "@secret-vault/core": "workspace:*"
+    "@harpoc/shared": "workspace:*",
+    "@harpoc/core": "workspace:*"
   },
   "scripts": {
     "build": "tsc",

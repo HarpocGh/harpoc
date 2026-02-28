@@ -12,6 +12,6 @@ const distDir = resolve(pkgRoot, "dist");
 
 describe("rest-api", () => {
   describeBuildOutput(distDir);
-  describeCrossPackageImports(["@secret-vault/shared", "@secret-vault/core"]);
-  describeWorkspaceDeps(pkgRoot, ["@secret-vault/shared", "@secret-vault/core"]);
+  describeCrossPackageImports(["@harpoc/shared", "@harpoc/core"]);
+  describeWorkspaceDeps(pkgRoot, ["@harpoc/shared", "@harpoc/core"]);
 });

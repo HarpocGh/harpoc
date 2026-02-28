@@ -1,5 +1,5 @@
 {
-  "name": "@secret-vault/rest-api",
+  "name": "@harpoc/rest-api",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,8 +10,8 @@
     }
   },
   "dependencies": {
-    "@secret-vault/shared": "workspace:*",
-    "@secret-vault/core": "workspace:*"
+    "@harpoc/shared": "workspace:*",
+    "@harpoc/core": "workspace:*"
   },
   "scripts": {
     "build": "tsc",

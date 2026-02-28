@@ -51,15 +51,15 @@ describe("monorepo structure", () => {
 });
 
 describe("bin entries", () => {
-  it('cli declares "sv" bin', () => {
+  it('cli declares "harpoc" bin', () => {
     const raw = readFileSync(resolve(monorepoRoot, "packages", "cli", "package.json"), "utf-8");
     const pkgJson = JSON.parse(raw) as Record<string, unknown>;
     expect(pkgJson.bin).toBeDefined();
     const bin = pkgJson.bin as Record<string, string>;
-    expect(bin.sv).toBe("./dist/index.js");
+    expect(bin.harpoc).toBe("./dist/index.js");
   });
 
-  it('mcp-server declares "secret-vault-mcp" bin', () => {
+  it('mcp-server declares "harpoc-mcp" bin', () => {
     const raw = readFileSync(
       resolve(monorepoRoot, "packages", "mcp-server", "package.json"),
       "utf-8",
@@ -67,6 +67,6 @@ describe("bin entries", () => {
     const pkgJson = JSON.parse(raw) as Record<string, unknown>;
     expect(pkgJson.bin).toBeDefined();
     const bin = pkgJson.bin as Record<string, string>;
-    expect(bin["secret-vault-mcp"]).toBe("./dist/index.js");
+    expect(bin["harpoc-mcp"]).toBe("./dist/index.js");
   });
 });

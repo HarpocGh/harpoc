@@ -12,6 +12,6 @@ const distDir = resolve(pkgRoot, "dist");
 
 describe("core", () => {
   describeBuildOutput(distDir);
-  describeCrossPackageImports(["@secret-vault/shared"]);
-  describeWorkspaceDeps(pkgRoot, ["@secret-vault/shared"]);
+  describeCrossPackageImports(["@harpoc/shared"]);
+  describeWorkspaceDeps(pkgRoot, ["@harpoc/shared"]);
 });

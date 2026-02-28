@@ -1,5 +1,5 @@
 {
-  "name": "@secret-vault/core",
+  "name": "@harpoc/core",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -10,7 +10,7 @@
     }
   },
   "dependencies": {
-    "@secret-vault/shared": "workspace:*"
+    "@harpoc/shared": "workspace:*"
   },
   "scripts": {
     "build": "tsc",

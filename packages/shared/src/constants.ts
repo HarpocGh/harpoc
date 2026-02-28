@@ -4,7 +4,7 @@
 
 // -- Paths (relative names only — runtime resolution belongs in core/) -------
 
-export const VAULT_DIR_NAME = ".secret-vault";
+export const VAULT_DIR_NAME = ".harpoc";
 export const VAULT_DB_NAME = "default.vault.db";
 export const SESSION_FILE_NAME = "session.json";
 export const CONFIG_FILE_NAME = "config.json";

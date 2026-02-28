@@ -168,7 +168,7 @@ describe("AES-256-GCM constants", () => {
 
 describe("path constants", () => {
   it("VAULT_DIR_NAME", () => {
-    expect(VAULT_DIR_NAME).toBe(".secret-vault");
+    expect(VAULT_DIR_NAME).toBe(".harpoc");
   });
 
   it("VAULT_DB_NAME", () => {

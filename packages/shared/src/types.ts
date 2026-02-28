@@ -143,7 +143,7 @@ export interface AuditEvent {
   success: boolean;
 }
 
-/** Session file persisted at ~/.secret-vault/session.json (all binary values base64-encoded). */
+/** Session file persisted at ~/.harpoc/session.json (all binary values base64-encoded). */
 export interface SessionFile {
   version: 1;
   session_id: string;
