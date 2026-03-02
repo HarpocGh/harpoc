@@ -1,0 +1,93 @@
+# Harpoc
+
+Secure secret management for LLMs and AI agents. Secrets are encrypted at rest, never exposed to the model — only injected at the execution layer via opaque `secret://` handles.
+
+## Why
+
+The MCP specification has no built-in credential management. In practice, 79% of MCP servers pass credentials via environment variables and 48% recommend `.env` files. Harpoc solves this with a zero-knowledge vault where the LLM never sees raw credentials — it only references opaque handles like `secret://github-token`, and the vault injects credentials into HTTP requests at execution time.
+
+## Features
+
+- **Zero-knowledge to LLM** — models see `secret://` handles, never raw values
+- **Encrypted at rest** — AES-256-GCM with Argon2id key derivation, 3-tier key hierarchy (master → KEK → per-secret DEK)
+- **MCP-native** — first-class MCP server (`harpoc-mcp`) for Claude, GPT, and any MCP-capable client
+- **HTTP secret injection** — bearer tokens, custom headers, query parameters, basic auth — injected at fetch time with SSRF prevention
+- **Audit trail** — every vault operation logged, detail fields encrypted at rest
+- **Access control** — per-secret policies with scoped permissions
+- **Multiple interfaces** — MCP server, REST API, TypeScript SDK, CLI
+
+## Architecture
+
+```
+Consumer    MCP Host  ·  REST Client  ·  SDK  ·  CLI
+               │             │           │       │
+Interface   MCP Server · REST API  ·   SDK  ·  CLI
+               │             │           │       │
+Core        ┌──┴─────────────┴───────────┴───────┘
+            │  VaultEngine
+            │  ├── Crypto (AES-256-GCM, Argon2id, HKDF, key hierarchy)
+            │  ├── SecretManager (CRUD, rotation, handle resolution)
+            │  ├── HttpInjector (secret injection, SSRF prevention)
+            │  ├── PolicyEngine (per-secret access control)
+            │  ├── AuditLogger (encrypted audit trail)
+            │  └── SessionManager (JWT auth, sliding window TTL)
+            │
+Storage     SQLite (WAL mode, encrypted payloads)
+```
+
+## Packages
+
+| Package | Description | Status |
+|---------|-------------|--------|
+| `@harpoc/shared` | Types, Zod schemas, error codes, constants | Complete |
+| `@harpoc/core` | VaultEngine, crypto, storage, secrets, audit, access control | Complete |
+| `@harpoc/mcp-server` | MCP tools, resources, guards (stdio transport) | Planned |
+| `@harpoc/rest-api` | Hono HTTP routes, JWT middleware | Planned |
+| `@harpoc/sdk` | TypeScript client (REST + in-process modes) | Planned |
+| `@harpoc/cli` | `harpoc` CLI (Commander.js) | Planned |
+
+## Quick Start
+
+**Prerequisites:** Node.js 22+, pnpm 10+
+
+```bash
+pnpm install
+pnpm build
+pnpm test
+```
+
+## Development
+
+```bash
+pnpm build           # Build all packages (Turborepo)
+pnpm test            # Run all tests
+pnpm lint            # Lint all packages
+pnpm format:check    # Check formatting
+pnpm format          # Fix formatting
+```
+
+## Security Model
+
+- **3-tier key hierarchy**: password → master key (Argon2id) → KEK (HKDF) → per-secret DEK (random). Password change is O(1) — only re-wraps the KEK.
+- **AES-256-GCM** with authenticated additional data (AAD) binding per secret ID, preventing ciphertext substitution.
+- **Argon2id** with OWASP-recommended parameters (64 MB memory, 3 iterations, 4 parallelism).
+- **SSRF prevention**: private IP blocking (RFC 1918, link-local, IPv4-mapped IPv6), HTTPS enforcement, redirect validation with credential stripping on cross-origin hops.
+- **Secret names encrypted** with vault-level KEK — database inspection reveals nothing about stored services.
+- **JWT sessions** with sliding window TTL (15 min default, 24 h maximum), store-based token revocation.
+
+## Roadmap
+
+| Version | Scope |
+|---------|-------|
+| **v1.0** | Core vault + MCP + REST + SDK + CLI. API keys and static tokens. Local single-user. HTTP-only injection. |
+| **v1.1** | OAuth 2.1 proxy (PKCE, provider presets, auto-refresh). Certificate lifecycle (ACME). |
+| **v2.0** | Cloud sync (vector clocks, conflict resolution). Team vaults (Shamir's Secret Sharing). |
+| **v2.1+** | Non-HTTP injection: database connection strings, SSH key agent, SMTP, WebSocket auth. |
+
+## Tech Stack
+
+TypeScript (strict mode, ESM-only) · pnpm + Turborepo · SQLite (better-sqlite3, WAL mode) · AES-256-GCM + Argon2id (`node:crypto` + `argon2`) · Zod · Vitest
+
+## License
+
+[BSL 1.1](LICENSE) — code is publicly visible and auditable. Commercial use as a hosted service is restricted. Each release converts to Apache 2.0 after 3 years.
