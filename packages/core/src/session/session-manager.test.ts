@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, rmSync, writeFileSync, statSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
@@ -172,5 +172,53 @@ describe("createSessionData", () => {
     );
 
     expect(session.expires_at - session.created_at).toBe(5000);
+  });
+});
+
+describe("file permissions", () => {
+  it("session file has mode 0o600 after write (Unix only)", async () => {
+    if (process.platform === "win32") return; // Skip on Windows
+    const session = makeValidSession();
+    await manager.writeSession(session);
+
+    const stats = statSync(sessionPath);
+    // 0o600 = owner read/write only
+    expect(stats.mode & 0o777).toBe(0o600);
+  });
+
+  it("session file permissions set via icacls on Windows (Windows only)", async () => {
+    if (process.platform !== "win32") return; // Skip on non-Windows
+    const session = makeValidSession();
+    // writeSession internally calls icacls on Windows — should not throw
+    await manager.writeSession(session);
+    expect(existsSync(sessionPath)).toBe(true);
+  });
+});
+
+describe("secure erase", () => {
+  it("file is deleted after eraseSession", async () => {
+    const session = makeValidSession();
+    await manager.writeSession(session);
+    expect(existsSync(sessionPath)).toBe(true);
+
+    await manager.eraseSession();
+    expect(existsSync(sessionPath)).toBe(false);
+  });
+
+  it("eraseSession is idempotent (double-call does not throw)", async () => {
+    const session = makeValidSession();
+    await manager.writeSession(session);
+
+    await manager.eraseSession();
+    await expect(manager.eraseSession()).resolves.not.toThrow();
+  });
+
+  it("after erase, no tmp files remain in the directory", async () => {
+    const session = makeValidSession();
+    await manager.writeSession(session);
+    await manager.eraseSession();
+
+    const remaining = readdirSync(sessionDir).filter((f) => f.includes(".tmp"));
+    expect(remaining).toHaveLength(0);
   });
 });

@@ -35,9 +35,18 @@ importers:
       '@harpoc/core':
         specifier: workspace:*
         version: link:../core
+      '@harpoc/mcp-server':
+        specifier: workspace:*
+        version: link:../mcp-server
+      '@harpoc/rest-api':
+        specifier: workspace:*
+        version: link:../rest-api
       '@harpoc/shared':
         specifier: workspace:*
         version: link:../shared
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.27.1
+        version: 1.27.1(zod@3.25.76)
       commander:
         specifier: ^13.1.0
         version: 13.1.0
@@ -64,6 +73,30 @@ importers:
       '@types/node':
         specifier: ^22.15.0
         version: 22.19.13
+
+  packages/integration:
+    dependencies:
+      '@harpoc/core':
+        specifier: workspace:*
+        version: link:../core
+      '@harpoc/mcp-server':
+        specifier: workspace:*
+        version: link:../mcp-server
+      '@harpoc/rest-api':
+        specifier: workspace:*
+        version: link:../rest-api
+      '@harpoc/sdk':
+        specifier: workspace:*
+        version: link:../sdk
+      '@harpoc/shared':
+        specifier: workspace:*
+        version: link:../shared
+      '@hono/node-server':
+        specifier: ^1.14.0
+        version: 1.19.10(hono@4.12.5)
+      '@modelcontextprotocol/sdk':
+        specifier: ^1.27.1
+        version: 1.27.1(zod@3.25.76)
 
   packages/mcp-server:
     dependencies:

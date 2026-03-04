@@ -12,6 +12,6 @@ const distDir = resolve(pkgRoot, "dist");
 
 describe("cli", () => {
   describeBuildOutput(distDir, { shebang: true });
-  describeCrossPackageImports(["@harpoc/shared", "@harpoc/core"]);
-  describeWorkspaceDeps(pkgRoot, ["@harpoc/shared", "@harpoc/core"]);
+  describeCrossPackageImports(["@harpoc/shared", "@harpoc/core", "@harpoc/mcp-server", "@harpoc/rest-api"]);
+  describeWorkspaceDeps(pkgRoot, ["@harpoc/shared", "@harpoc/core", "@harpoc/mcp-server", "@harpoc/rest-api"]);
 });
