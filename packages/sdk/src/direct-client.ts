@@ -1,0 +1,82 @@
+import type { VaultEngine } from "@harpoc/core";
+import type { AccessPolicy, CreateSecretResponse, UseSecretResponse } from "@harpoc/shared";
+import type { AuditQueryOptions, DecryptedAuditEvent, SecretInfo } from "@harpoc/core";
+import type {
+  CreateSecretInput,
+  GrantPolicyInput,
+  HealthResponse,
+  UseSecretInput,
+  VaultClient,
+} from "./client.js";
+import { VAULT_VERSION } from "@harpoc/shared";
+
+export class DirectClient implements VaultClient {
+  constructor(private readonly engine: VaultEngine) {}
+
+  async listSecrets(project?: string): Promise<SecretInfo[]> {
+    return this.engine.listSecrets(project);
+  }
+
+  async getSecretInfo(handle: string): Promise<SecretInfo> {
+    return this.engine.getSecretInfo(handle);
+  }
+
+  async getSecretValue(handle: string): Promise<Uint8Array> {
+    return this.engine.getSecretValue(handle);
+  }
+
+  async createSecret(input: CreateSecretInput): Promise<CreateSecretResponse> {
+    return this.engine.createSecret(input);
+  }
+
+  async rotateSecret(handle: string, newValue: Uint8Array): Promise<void> {
+    return this.engine.rotateSecret(handle, newValue);
+  }
+
+  async revokeSecret(handle: string): Promise<void> {
+    return this.engine.revokeSecret(handle);
+  }
+
+  async useSecret(handle: string, input: UseSecretInput): Promise<UseSecretResponse> {
+    return this.engine.useSecret(
+      handle,
+      input.request,
+      input.injection,
+      input.followRedirects,
+    );
+  }
+
+  async grantPolicy(handle: string, input: GrantPolicyInput): Promise<AccessPolicy> {
+    const secretId = await this.engine.resolveSecretId(handle);
+    return this.engine.grantPolicy(
+      {
+        secretId,
+        principalType: input.principalType,
+        principalId: input.principalId,
+        permissions: input.permissions,
+        expiresAt: input.expiresAt,
+      },
+      "sdk-direct",
+    );
+  }
+
+  async revokePolicy(_handle: string, policyId: string): Promise<void> {
+    this.engine.revokePolicy(policyId);
+  }
+
+  async listPolicies(handle: string): Promise<AccessPolicy[]> {
+    const secretId = await this.engine.resolveSecretId(handle);
+    return this.engine.listPolicies(secretId);
+  }
+
+  async queryAudit(options?: AuditQueryOptions): Promise<DecryptedAuditEvent[]> {
+    return this.engine.queryAudit(options);
+  }
+
+  async getHealth(): Promise<HealthResponse> {
+    return {
+      state: this.engine.getState(),
+      version: VAULT_VERSION,
+    };
+  }
+}

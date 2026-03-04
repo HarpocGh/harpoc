@@ -88,6 +88,12 @@ importers:
       '@harpoc/shared':
         specifier: workspace:*
         version: link:../shared
+      '@hono/node-server':
+        specifier: ^1.14.0
+        version: 1.19.10(hono@4.12.5)
+      hono:
+        specifier: ^4.7.0
+        version: 4.12.5
 
   packages/sdk:
     dependencies:

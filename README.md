@@ -42,9 +42,9 @@ Storage     SQLite (WAL mode, encrypted payloads)
 | `@harpoc/shared` | Types, Zod schemas, error codes, constants | Complete |
 | `@harpoc/core` | VaultEngine, crypto, storage, secrets, audit, access control | Complete |
 | `@harpoc/cli` | `harpoc` CLI (Commander.js) | Complete |
-| `@harpoc/mcp-server` | MCP tools, resources, guards (stdio transport) | Planned |
-| `@harpoc/rest-api` | Hono HTTP routes, JWT middleware | Planned |
-| `@harpoc/sdk` | TypeScript client (REST + in-process modes) | Planned |
+| `@harpoc/mcp-server` | MCP tools, resources, guards (stdio transport) | Complete |
+| `@harpoc/rest-api` | Hono HTTP API, JWT auth, rate limiting, audit middleware | Complete |
+| `@harpoc/sdk` | TypeScript client (REST + in-process modes) | Complete |
 
 ## Quick Start
 
