@@ -172,6 +172,8 @@ export interface VaultApiToken {
   iat: number;
   exp: number;
   jti: string;
+  project?: string;
+  secrets?: string[];
 }
 
 /** Request to execute an HTTP call with an injected secret. */

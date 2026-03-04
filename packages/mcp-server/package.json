@@ -13,8 +13,10 @@
     }
   },
   "dependencies": {
+    "@harpoc/core": "workspace:*",
     "@harpoc/shared": "workspace:*",
-    "@harpoc/core": "workspace:*"
+    "@modelcontextprotocol/sdk": "^1.27.1",
+    "zod": "^3.25.76"
   },
   "scripts": {
     "build": "tsc",

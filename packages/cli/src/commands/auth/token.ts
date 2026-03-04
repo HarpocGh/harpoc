@@ -41,7 +41,9 @@ export function registerAuthTokenCommand(auth: Command): void {
           }
           const ttlMs = ttlMinutes * 60 * 1000;
 
-          const token = engine.createToken(subject, scope, ttlMs);
+          const project = options.project;
+          const secrets = options.secrets ? options.secrets.split(",").map((s) => s.trim()) : undefined;
+          const token = engine.createToken(subject, scope, ttlMs, { project, secrets });
 
           if (options.json) {
             printJson({

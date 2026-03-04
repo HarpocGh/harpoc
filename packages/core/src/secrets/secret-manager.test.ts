@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
 import { ErrorCode, VaultError } from "@harpoc/shared";
 import { createVaultKeys } from "../crypto/key-hierarchy.js";
 import { SqliteStore } from "../storage/sqlite-store.js";
@@ -7,11 +7,16 @@ import { SecretManager } from "./secret-manager.js";
 let store: SqliteStore;
 let manager: SecretManager;
 let kek: Uint8Array;
+let cachedKek: Uint8Array;
 
-beforeEach(async () => {
-  store = new SqliteStore(":memory:");
+beforeAll(async () => {
   const keys = await createVaultKeys("test-password");
-  kek = keys.kek;
+  cachedKek = keys.kek;
+});
+
+beforeEach(() => {
+  store = new SqliteStore(":memory:");
+  kek = cachedKek;
   manager = new SecretManager(store, kek);
 });
 

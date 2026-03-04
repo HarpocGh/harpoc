@@ -482,6 +482,7 @@ export class VaultEngine {
     subject: string,
     scope: Permission[],
     ttlMs: number = 3600_000,
+    options?: { project?: string; secrets?: string[] },
   ): string {
     const s = this.assertUnlocked();
 
@@ -495,6 +496,9 @@ export class VaultEngine {
       exp: now + Math.floor(effectiveTtl / 1000),
       jti: generateUUIDv7(),
     };
+
+    if (options?.project) payload.project = options.project;
+    if (options?.secrets?.length) payload.secrets = options.secrets;
 
     return this.signJwt(payload);
   }

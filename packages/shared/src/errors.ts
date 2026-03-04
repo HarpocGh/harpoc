@@ -49,6 +49,9 @@ export enum ErrorCode {
   POLICY_CONFLICT = "POLICY_CONFLICT",
   PRINCIPAL_NOT_FOUND = "PRINCIPAL_NOT_FOUND",
 
+  // Rate limiting
+  RATE_LIMIT_EXCEEDED = "RATE_LIMIT_EXCEEDED",
+
   // System
   INTERNAL_ERROR = "INTERNAL_ERROR",
   DATABASE_ERROR = "DATABASE_ERROR",
@@ -104,6 +107,9 @@ const STATUS_MAP: Record<ErrorCode, number> = {
   [ErrorCode.POLICY_NOT_FOUND]: 404,
   [ErrorCode.POLICY_CONFLICT]: 409,
   [ErrorCode.PRINCIPAL_NOT_FOUND]: 404,
+
+  // Rate limiting
+  [ErrorCode.RATE_LIMIT_EXCEEDED]: 429,
 
   // System
   [ErrorCode.INTERNAL_ERROR]: 500,

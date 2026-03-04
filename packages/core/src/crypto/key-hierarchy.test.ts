@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import { AES_KEY_LENGTH, ErrorCode, VaultError } from "@harpoc/shared";
 import {
   changePassword,
@@ -13,6 +13,11 @@ import {
   wrapDek,
 } from "./key-hierarchy.js";
 import { generateRandomBytes } from "./random.js";
+
+let cachedKeys: Awaited<ReturnType<typeof createVaultKeys>>;
+beforeAll(async () => {
+  cachedKeys = await createVaultKeys("password");
+});
 
 describe("createVaultKeys", () => {
   it("returns all required vault keys including wrapped jwt/audit keys", async () => {
@@ -126,14 +131,13 @@ describe("unlockVault", () => {
 });
 
 describe("wrapDek / unwrapDek", () => {
-  it("roundtrips a DEK", async () => {
-    const created = await createVaultKeys("password");
+  it("roundtrips a DEK", () => {
     const dek = generateRandomBytes(AES_KEY_LENGTH);
     const secretId = "test-secret-id";
 
-    const wrapped = wrapDek(created.kek, dek, secretId);
+    const wrapped = wrapDek(cachedKeys.kek, dek, secretId);
     const unwrapped = unwrapDek(
-      created.kek,
+      cachedKeys.kek,
       wrapped.wrappedDek,
       wrapped.dekIv,
       wrapped.dekTag,
@@ -143,14 +147,13 @@ describe("wrapDek / unwrapDek", () => {
     expect(Buffer.from(unwrapped).equals(Buffer.from(dek))).toBe(true);
   });
 
-  it("fails with wrong secretId (AAD mismatch)", async () => {
-    const created = await createVaultKeys("password");
+  it("fails with wrong secretId (AAD mismatch)", () => {
     const dek = generateRandomBytes(AES_KEY_LENGTH);
 
-    const wrapped = wrapDek(created.kek, dek, "secret-1");
+    const wrapped = wrapDek(cachedKeys.kek, dek, "secret-1");
 
     expect(() =>
-      unwrapDek(created.kek, wrapped.wrappedDek, wrapped.dekIv, wrapped.dekTag, "secret-2"),
+      unwrapDek(cachedKeys.kek, wrapped.wrappedDek, wrapped.dekIv, wrapped.dekTag, "secret-2"),
     ).toThrow("decryption failed");
   });
 });
@@ -198,13 +201,12 @@ describe("encryptSecretValue / decryptSecretValue", () => {
 });
 
 describe("encryptName / decryptName", () => {
-  it("roundtrips a secret name", async () => {
-    const created = await createVaultKeys("password");
+  it("roundtrips a secret name", () => {
     const secretId = "test-id";
 
-    const encrypted = encryptName(created.kek, "github-token", secretId);
+    const encrypted = encryptName(cachedKeys.kek, "github-token", secretId);
     const decrypted = decryptName(
-      created.kek,
+      cachedKeys.kek,
       encrypted.ciphertext,
       encrypted.iv,
       encrypted.tag,
@@ -214,23 +216,20 @@ describe("encryptName / decryptName", () => {
     expect(decrypted).toBe("github-token");
   });
 
-  it("handles unicode names", async () => {
-    const created = await createVaultKeys("password");
+  it("handles unicode names", () => {
     const name = "schl\u00fcssel-\ud83d\udd11";
 
-    const encrypted = encryptName(created.kek, name, "id1");
-    const decrypted = decryptName(created.kek, encrypted.ciphertext, encrypted.iv, encrypted.tag, "id1");
+    const encrypted = encryptName(cachedKeys.kek, name, "id1");
+    const decrypted = decryptName(cachedKeys.kek, encrypted.ciphertext, encrypted.iv, encrypted.tag, "id1");
 
     expect(decrypted).toBe(name);
   });
 
-  it("fails with wrong secretId (AAD mismatch)", async () => {
-    const created = await createVaultKeys("password");
-
-    const encrypted = encryptName(created.kek, "name", "id1");
+  it("fails with wrong secretId (AAD mismatch)", () => {
+    const encrypted = encryptName(cachedKeys.kek, "name", "id1");
 
     expect(() =>
-      decryptName(created.kek, encrypted.ciphertext, encrypted.iv, encrypted.tag, "id2"),
+      decryptName(cachedKeys.kek, encrypted.ciphertext, encrypted.iv, encrypted.tag, "id2"),
     ).toThrow("decryption failed");
   });
 });
@@ -369,30 +368,26 @@ describe("changePassword", () => {
 
 describe("computeNameHmac", () => {
   it("produces consistent HMAC for same inputs", async () => {
-    const keys = await createVaultKeys("password");
-    const h1 = await computeNameHmac(keys.kek, "test", null);
-    const h2 = await computeNameHmac(keys.kek, "test", null);
+    const h1 = await computeNameHmac(cachedKeys.kek, "test", null);
+    const h2 = await computeNameHmac(cachedKeys.kek, "test", null);
     expect(h1).toBe(h2);
   });
 
   it("produces different HMAC for different names", async () => {
-    const keys = await createVaultKeys("password");
-    const h1 = await computeNameHmac(keys.kek, "name-a", null);
-    const h2 = await computeNameHmac(keys.kek, "name-b", null);
+    const h1 = await computeNameHmac(cachedKeys.kek, "name-a", null);
+    const h2 = await computeNameHmac(cachedKeys.kek, "name-b", null);
     expect(h1).not.toBe(h2);
   });
 
   it("produces different HMAC for same name in different projects", async () => {
-    const keys = await createVaultKeys("password");
-    const h1 = await computeNameHmac(keys.kek, "token", "proj-a");
-    const h2 = await computeNameHmac(keys.kek, "token", "proj-b");
+    const h1 = await computeNameHmac(cachedKeys.kek, "token", "proj-a");
+    const h2 = await computeNameHmac(cachedKeys.kek, "token", "proj-b");
     expect(h1).not.toBe(h2);
   });
 
   it("produces different HMAC for name with project vs without", async () => {
-    const keys = await createVaultKeys("password");
-    const h1 = await computeNameHmac(keys.kek, "token", null);
-    const h2 = await computeNameHmac(keys.kek, "token", "proj");
+    const h1 = await computeNameHmac(cachedKeys.kek, "token", null);
+    const h2 = await computeNameHmac(cachedKeys.kek, "token", "proj");
     expect(h1).not.toBe(h2);
   });
 });

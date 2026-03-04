@@ -3,9 +3,22 @@ import type { Server } from "node:http";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from "vitest";
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { AuditEventType, ErrorCode, VaultError, VaultState } from "@harpoc/shared";
 import { VaultEngine } from "./vault-engine.js";
+
+vi.mock("./crypto/argon2.js", async (importOriginal) => {
+  const original = await importOriginal<typeof import("./crypto/argon2.js")>();
+  return {
+    ...original,
+    deriveKey: async (password: string, salt: Uint8Array) => {
+      const { createHash } = await import("node:crypto");
+      return new Uint8Array(
+        createHash("sha256").update(password).update(salt).digest(),
+      );
+    },
+  };
+});
 
 let tempDir: string;
 let dbPath: string;
