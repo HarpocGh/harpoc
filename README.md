@@ -117,6 +117,7 @@ pnpm format          # Fix formatting
 |---------|-------|
 | **v1.0** | Core vault + MCP + REST + SDK + CLI. API keys and static tokens. Local single-user. HTTP-only injection. |
 | **v1.1** | OAuth 2.1 proxy (PKCE, provider presets, auto-refresh). Certificate lifecycle (ACME). |
+| **v1.2** | Web UI for vault management and agent governance. Agent registry, permission matrix, token lifecycle dashboard, per-agent audit feed. |
 | **v2.0** | Cloud sync (vector clocks, conflict resolution). Team vaults (Shamir's Secret Sharing). |
 | **v2.1+** | Non-HTTP injection: database connection strings, SSH key agent, SMTP, WebSocket auth. |
 
