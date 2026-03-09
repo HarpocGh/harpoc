@@ -174,8 +174,14 @@ export class VaultEngine {
 
     try {
       const keys = await unlockVault(
-        password, salt, wrappedKek, wrappedKekIv, wrappedKekTag, vaultId,
-        wrappedJwtKey, wrappedAuditKey,
+        password,
+        salt,
+        wrappedKek,
+        wrappedKekIv,
+        wrappedKekTag,
+        vaultId,
+        wrappedJwtKey,
+        wrappedAuditKey,
       );
 
       this.store = store;
@@ -670,9 +676,18 @@ export class VaultEngine {
   }
 
   private wipeKeys(): void {
-    if (this.kek) { wipeBuffer(this.kek); this.kek = null; }
-    if (this.jwtKey) { wipeBuffer(this.jwtKey); this.jwtKey = null; }
-    if (this.auditKey) { wipeBuffer(this.auditKey); this.auditKey = null; }
+    if (this.kek) {
+      wipeBuffer(this.kek);
+      this.kek = null;
+    }
+    if (this.jwtKey) {
+      wipeBuffer(this.jwtKey);
+      this.jwtKey = null;
+    }
+    if (this.auditKey) {
+      wipeBuffer(this.auditKey);
+      this.auditKey = null;
+    }
 
     this.secretManager = null;
     this.policyEngine = null;
@@ -774,7 +789,10 @@ export class VaultEngine {
         Math.floor((attempts - LOCKOUT_MAX_ATTEMPTS) / LOCKOUT_MAX_ATTEMPTS),
         LOCKOUT_DURATIONS_MS.length - 1,
       );
-      const duration = LOCKOUT_DURATIONS_MS[lockoutIndex] ?? LOCKOUT_DURATIONS_MS[LOCKOUT_DURATIONS_MS.length - 1] ?? 1800_000;
+      const duration =
+        LOCKOUT_DURATIONS_MS[lockoutIndex] ??
+        LOCKOUT_DURATIONS_MS[LOCKOUT_DURATIONS_MS.length - 1] ??
+        1800_000;
       store.setMeta("lockout_until", String(Date.now() + duration));
     }
   }
@@ -787,9 +805,7 @@ export class VaultEngine {
     const jwtKey = this.jwtKey as Uint8Array;
     const header = Buffer.from(JSON.stringify({ alg: "HS256", typ: "JWT" })).toString("base64url");
     const body = Buffer.from(JSON.stringify(payload)).toString("base64url");
-    const signature = createHmac("sha256", jwtKey)
-      .update(`${header}.${body}`)
-      .digest("base64url");
+    const signature = createHmac("sha256", jwtKey).update(`${header}.${body}`).digest("base64url");
 
     return `${header}.${body}.${signature}`;
   }
@@ -804,9 +820,7 @@ export class VaultEngine {
     const [header, body, signature] = parts as [string, string, string];
 
     // Verify signature using timing-safe comparison
-    const expectedSig = createHmac("sha256", jwtKey)
-      .update(`${header}.${body}`)
-      .digest();
+    const expectedSig = createHmac("sha256", jwtKey).update(`${header}.${body}`).digest();
 
     const actualSig = Buffer.from(signature, "base64url");
 

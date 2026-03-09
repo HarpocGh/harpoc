@@ -167,9 +167,7 @@ describe("injectionConfigSchema", () => {
   });
 
   it("rejects header_name with colons", () => {
-    expect(() =>
-      injectionConfigSchema.parse({ type: "header", header_name: "X:Key" }),
-    ).toThrow();
+    expect(() => injectionConfigSchema.parse({ type: "header", header_name: "X:Key" })).toThrow();
   });
 
   it("rejects header_name with CRLF", () => {

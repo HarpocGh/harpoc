@@ -34,7 +34,9 @@ export function createMcpServer(options: CreateMcpServerOptions): McpServer {
     const token = engine.verifyToken(launchToken);
     scopeGuard = new ScopeGuard(token);
   } else {
-    process.stderr.write("[harpoc] WARNING: No launch token provided — all tools and resources are unrestricted\n");
+    process.stderr.write(
+      "[harpoc] WARNING: No launch token provided — all tools and resources are unrestricted\n",
+    );
     scopeGuard = new ScopeGuard(null);
   }
 

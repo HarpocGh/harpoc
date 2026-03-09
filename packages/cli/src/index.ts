@@ -1,5 +1,10 @@
 #!/usr/bin/env node
-export { resolveVaultDir, createEngine, loadUnlockedEngine, resolveSecretId } from "./utils/vault-loader.js";
+export {
+  resolveVaultDir,
+  createEngine,
+  loadUnlockedEngine,
+  resolveSecretId,
+} from "./utils/vault-loader.js";
 import { Command } from "commander";
 import { registerInitCommand } from "./commands/init.js";
 import { registerUnlockCommand } from "./commands/unlock.js";

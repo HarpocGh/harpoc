@@ -38,12 +38,7 @@ export class DirectClient implements VaultClient {
   }
 
   async useSecret(handle: string, input: UseSecretInput): Promise<UseSecretResponse> {
-    return this.engine.useSecret(
-      handle,
-      input.request,
-      input.injection,
-      input.followRedirects,
-    );
+    return this.engine.useSecret(handle, input.request, input.injection, input.followRedirects);
   }
 
   async grantPolicy(handle: string, input: GrantPolicyInput): Promise<AccessPolicy> {

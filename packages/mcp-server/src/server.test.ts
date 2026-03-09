@@ -8,7 +8,9 @@ function mockEngine(overrides: Record<string, unknown> = {}): VaultEngine {
     listSecrets: vi.fn().mockReturnValue([]),
     getSecretInfo: vi.fn().mockResolvedValue({}),
     useSecret: vi.fn().mockResolvedValue({ status: 200, body: "" }),
-    createSecret: vi.fn().mockResolvedValue({ handle: "secret://x", status: "pending", message: "" }),
+    createSecret: vi
+      .fn()
+      .mockResolvedValue({ handle: "secret://x", status: "pending", message: "" }),
     rotateSecret: vi.fn().mockResolvedValue(undefined),
     revokeSecret: vi.fn().mockResolvedValue(undefined),
     resolveSecretId: vi.fn().mockResolvedValue("uuid-123"),
@@ -69,7 +71,8 @@ describe("createMcpServer", () => {
     const server = createMcpServer({ engine });
 
     // Access internal tool registry
-    const lowLevel = (server as unknown as { server: { _requestHandlers: Map<string, unknown> } }).server;
+    const lowLevel = (server as unknown as { server: { _requestHandlers: Map<string, unknown> } })
+      .server;
     const listHandler = lowLevel._requestHandlers.get("tools/list") as (
       req: unknown,
       extra: unknown,
@@ -94,16 +97,20 @@ describe("createMcpServer", () => {
       const server = createMcpServer({ engine, launchToken: "token" });
 
       // Call tools/call through the server
-      const lowLevel = (server as unknown as { server: { _requestHandlers: Map<string, unknown> } }).server;
+      const lowLevel = (server as unknown as { server: { _requestHandlers: Map<string, unknown> } })
+        .server;
       const callHandler = lowLevel._requestHandlers.get("tools/call") as (
         req: { method: string; params: { name: string; arguments?: Record<string, unknown> } },
         extra: unknown,
       ) => Promise<unknown>;
 
-      const result = await callHandler(
-        { method: "tools/call", params: { name: "create_secret", arguments: { name: "x", type: "api_key" } } },
+      const result = (await callHandler(
+        {
+          method: "tools/call",
+          params: { name: "create_secret", arguments: { name: "x", type: "api_key" } },
+        },
         { signal: new AbortController().signal, sessionId: "test" },
-      ) as { content: Array<{ text: string }>; isError?: boolean };
+      )) as { content: Array<{ text: string }>; isError?: boolean };
       expect(result.isError).toBe(true);
       expect((result.content[0] as { text: string }).text).toContain("Access denied");
     });
@@ -122,7 +129,8 @@ describe("createMcpServer", () => {
 
       const server = createMcpServer({ engine, launchToken: "token" });
 
-      const lowLevel = (server as unknown as { server: { _requestHandlers: Map<string, unknown> } }).server;
+      const lowLevel = (server as unknown as { server: { _requestHandlers: Map<string, unknown> } })
+        .server;
       const callHandler = lowLevel._requestHandlers.get("tools/call") as (
         req: { method: string; params: { name: string; arguments?: Record<string, unknown> } },
         extra: unknown,

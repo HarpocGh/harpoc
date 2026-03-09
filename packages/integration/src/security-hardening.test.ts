@@ -39,7 +39,11 @@ describe("Memory Wiping", () => {
   });
 
   afterEach(async () => {
-    try { await vault.engine.destroy(); } catch { /* already destroyed */ }
+    try {
+      await vault.engine.destroy();
+    } catch {
+      /* already destroyed */
+    }
     destroyTestVault(vault).catch(() => {});
   });
 
@@ -281,12 +285,16 @@ describe("Error Message Sanitization", () => {
     // SECRET_NOT_FOUND
     try {
       await vault.engine.getSecretInfo("secret://no-such-secret");
-    } catch (e) { if (e instanceof VaultError) collectedErrors.push(e); }
+    } catch (e) {
+      if (e instanceof VaultError) collectedErrors.push(e);
+    }
 
     // INVALID_HANDLE
     try {
       await vault.engine.getSecretInfo("bad-handle-format");
-    } catch (e) { if (e instanceof VaultError) collectedErrors.push(e); }
+    } catch (e) {
+      if (e instanceof VaultError) collectedErrors.push(e);
+    }
 
     // useSecret with bad handle
     try {
@@ -295,7 +303,9 @@ describe("Error Message Sanitization", () => {
         { method: "GET", url: "https://example.com" },
         { type: InjectionType.BEARER },
       );
-    } catch (e) { if (e instanceof VaultError) collectedErrors.push(e); }
+    } catch (e) {
+      if (e instanceof VaultError) collectedErrors.push(e);
+    }
 
     expect(collectedErrors.length).toBeGreaterThan(0);
     for (const err of collectedErrors) {
@@ -392,10 +402,7 @@ describe("IV Uniqueness", () => {
 // ---------------------------------------------------------------------------
 describe("Timing Attack Protection", () => {
   it("vault-engine.ts imports and uses timingSafeEqual", () => {
-    const source = readFileSync(
-      join(REPO_ROOT, "packages/core/src/vault-engine.ts"),
-      "utf8",
-    );
+    const source = readFileSync(join(REPO_ROOT, "packages/core/src/vault-engine.ts"), "utf8");
     expect(source).toContain("import { createHmac, timingSafeEqual }");
     expect(source).toContain("timingSafeEqual(expectedSig, actualSig)");
   });
@@ -568,7 +575,11 @@ describe("Lockout Progression", () => {
     // Fail 4 times
     for (let i = 0; i < 4; i++) {
       const engine = new VaultEngine({ dbPath: vault.dbPath, sessionPath: vault.sessionPath });
-      try { await engine.unlock("bad-pw"); } catch { /* expected */ }
+      try {
+        await engine.unlock("bad-pw");
+      } catch {
+        /* expected */
+      }
       await engine.destroy();
     }
 
@@ -580,7 +591,11 @@ describe("Lockout Progression", () => {
     // Fail 4 more times — should still not trigger lockout
     for (let i = 0; i < 4; i++) {
       const engine2 = new VaultEngine({ dbPath: vault.dbPath, sessionPath: vault.sessionPath });
-      try { await engine2.unlock("bad-pw-2"); } catch { /* expected */ }
+      try {
+        await engine2.unlock("bad-pw-2");
+      } catch {
+        /* expected */
+      }
       await engine2.destroy();
     }
 
@@ -596,7 +611,11 @@ describe("Lockout Progression", () => {
     try {
       for (let i = 0; i < LOCKOUT_MAX_ATTEMPTS; i++) {
         const engine = new VaultEngine({ dbPath: vault.dbPath, sessionPath: vault.sessionPath });
-        try { await engine.unlock("wrong"); } catch { /* expected */ }
+        try {
+          await engine.unlock("wrong");
+        } catch {
+          /* expected */
+        }
         await engine.destroy();
       }
 
@@ -621,7 +640,11 @@ describe("Lockout Progression", () => {
       // First 5 failures → 30s lockout
       for (let i = 0; i < LOCKOUT_MAX_ATTEMPTS; i++) {
         const engine = new VaultEngine({ dbPath: vault.dbPath, sessionPath: vault.sessionPath });
-        try { await engine.unlock("wrong"); } catch { /* expected */ }
+        try {
+          await engine.unlock("wrong");
+        } catch {
+          /* expected */
+        }
         await engine.destroy();
       }
 
@@ -631,7 +654,11 @@ describe("Lockout Progression", () => {
       // 5 more failures (total 10) → 5 min lockout
       for (let i = 0; i < LOCKOUT_MAX_ATTEMPTS; i++) {
         const engine = new VaultEngine({ dbPath: vault.dbPath, sessionPath: vault.sessionPath });
-        try { await engine.unlock("wrong"); } catch { /* expected */ }
+        try {
+          await engine.unlock("wrong");
+        } catch {
+          /* expected */
+        }
         await engine.destroy();
       }
 
@@ -654,7 +681,11 @@ describe("Lockout Progression", () => {
       // 5 more failures (total 15) → 30 min lockout
       for (let i = 0; i < LOCKOUT_MAX_ATTEMPTS; i++) {
         const engine = new VaultEngine({ dbPath: vault.dbPath, sessionPath: vault.sessionPath });
-        try { await engine.unlock("wrong"); } catch { /* expected */ }
+        try {
+          await engine.unlock("wrong");
+        } catch {
+          /* expected */
+        }
         await engine.destroy();
       }
 
@@ -713,9 +744,7 @@ describe("No-Logging Static Audit", () => {
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i]!;
         if (consolePattern.test(line)) {
-          expect.fail(
-            `Found console call in ${filePath}:${i + 1}: ${line.trim()}`,
-          );
+          expect.fail(`Found console call in ${filePath}:${i + 1}: ${line.trim()}`);
         }
       }
     }
@@ -733,9 +762,7 @@ describe("No-Logging Static Audit", () => {
       for (let i = 0; i < lines.length; i++) {
         const line = lines[i]!;
         if (consolePattern.test(line)) {
-          expect.fail(
-            `Found console call in ${filePath}:${i + 1}: ${line.trim()}`,
-          );
+          expect.fail(`Found console call in ${filePath}:${i + 1}: ${line.trim()}`);
         }
       }
     }

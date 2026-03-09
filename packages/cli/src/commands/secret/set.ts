@@ -28,7 +28,9 @@ export function registerSecretSetCommand(secret: Command): void {
         const typeStr = options.type ?? "api_key";
         const typeResult = secretTypeSchema.safeParse(typeStr);
         if (!typeResult.success) {
-          throw new Error(`Invalid secret type: "${typeStr}". Valid: api_key, oauth_token, certificate`);
+          throw new Error(
+            `Invalid secret type: "${typeStr}". Valid: api_key, oauth_token, certificate`,
+          );
         }
         const secretType = typeResult.data as SecretType;
 
@@ -58,7 +60,9 @@ export function registerSecretSetCommand(secret: Command): void {
     });
 }
 
-function buildInjectionConfig(options: Record<string, string | undefined>): InjectionConfig | undefined {
+function buildInjectionConfig(
+  options: Record<string, string | undefined>,
+): InjectionConfig | undefined {
   if (!options.injection) return undefined;
   const raw: Record<string, unknown> = { type: options.injection };
   if (options.headerName) raw.header_name = options.headerName;

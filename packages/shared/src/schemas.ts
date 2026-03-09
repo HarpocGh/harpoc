@@ -55,7 +55,10 @@ export const injectionConfigSchema = z.discriminatedUnion("type", [
   z.object({ type: z.literal(InjectionType.BASIC_AUTH) }),
   z.object({
     type: z.literal(InjectionType.HEADER),
-    header_name: z.string().min(1).regex(/^[a-zA-Z0-9\-_]+$/, "Invalid header name characters"),
+    header_name: z
+      .string()
+      .min(1)
+      .regex(/^[a-zA-Z0-9\-_]+$/, "Invalid header name characters"),
   }),
   z.object({
     type: z.literal(InjectionType.QUERY),

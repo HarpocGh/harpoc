@@ -13,9 +13,7 @@ vi.mock("./crypto/argon2.js", async (importOriginal) => {
     ...original,
     deriveKey: async (password: string, salt: Uint8Array) => {
       const { createHash } = await import("node:crypto");
-      return new Uint8Array(
-        createHash("sha256").update(password).update(salt).digest(),
-      );
+      return new Uint8Array(createHash("sha256").update(password).update(salt).digest());
     },
   };
 });

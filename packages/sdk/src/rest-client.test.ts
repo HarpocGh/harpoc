@@ -57,10 +57,7 @@ describe("RestClient", () => {
       const result = await client.getSecretInfo("secret://key");
 
       expect(result).toEqual(info);
-      expect(fetchSpy).toHaveBeenCalledWith(
-        `${BASE_URL}/api/v1/secrets/key`,
-        expect.anything(),
-      );
+      expect(fetchSpy).toHaveBeenCalledWith(`${BASE_URL}/api/v1/secrets/key`, expect.anything());
     });
 
     it("encodes project/name handles", async () => {
